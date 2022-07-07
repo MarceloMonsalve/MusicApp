@@ -40,7 +40,7 @@ struct PostView: View {
             }
             .foregroundColor(.white)
             .padding(20)
-//            .background(.black)
+            .background(.black)
 
         }
             

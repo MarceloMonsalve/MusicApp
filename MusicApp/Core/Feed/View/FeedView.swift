@@ -63,8 +63,6 @@ struct FeedView: View {
         }
         .foregroundColor(.white)
         .background(.black)
-        
-        
     }
 }
 
