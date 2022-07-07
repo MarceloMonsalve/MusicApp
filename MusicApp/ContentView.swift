@@ -6,11 +6,15 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct ContentView: View {
     var body: some View {
-        FeedView()
-            .navigationBarHidden(true)
+        if Auth.auth().currentUser != nil {
+          FeedView()
+        } else {
+          LoginView()
+        }
     }
 }
 

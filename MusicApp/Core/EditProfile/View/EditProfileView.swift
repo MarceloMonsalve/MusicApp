@@ -19,7 +19,6 @@ struct EditProfileView: View {
             Text("Change Bio")
             Text("Confirm")
         }
-
     }
 }
 

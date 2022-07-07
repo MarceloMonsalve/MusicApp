@@ -32,11 +32,6 @@ struct FeedView: View {
                             .foregroundColor(.white)
                             .frame(width: 48, height: 48)
                     }
-                    
-
-
-                    Spacer()
-                    
                     Spacer()
                     NavigationLink {
                         ProfileView()
