@@ -20,30 +20,33 @@ struct CustomInputField: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 20, height: 20)
+                    .foregroundStyle(Color.icon, .primary)
                 if isSecureField ?? false {
                     SecureField(placeholderText, text: $text)
-                        .foregroundColor(.white)
                 } else {
                     TextField(placeholderText, text: $text)
-                        .foregroundColor(.white)
                 }
-                
             }
-            Divider()
-                .foregroundColor(.white)
-                .background(.white)
+            HLine(color: Color.text, width: 1)
         }
-        .foregroundColor(.white)
-        .background(.black)
     }
 }
 
 struct CustomInputField_Previews: PreviewProvider {
     static var previews: some View {
-        CustomInputField(imageName: "envelope",
-                         placeholderText: "Email",
-                         isSecureField: false,
-                         text: .constant("")
-        )
+        Group {
+            CustomInputField(imageName: "envelope",
+                             placeholderText: "Email",
+                             isSecureField: false,
+                             text: .constant("")
+            )
+            .preferredColorScheme(.light)
+            CustomInputField(imageName: "envelope",
+                             placeholderText: "Email",
+                             isSecureField: false,
+                             text: .constant("")
+            )
+            .preferredColorScheme(.dark)
+        }
     }
 }

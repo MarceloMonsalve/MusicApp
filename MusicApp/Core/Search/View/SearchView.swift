@@ -13,13 +13,12 @@ struct SearchView: View {
     var body: some View {
         VStack(alignment: .leading) {
             searchBar
-            HLine(color: .white, width: 1)
+//            HLine(color: Color.text, width: 1)
 
             Spacer()
         }
-        .foregroundColor(.white)
-        .background(.black)
-        
+        .foregroundColor(Color.text)
+        .background(Color.background)
     }
 }
 
@@ -27,13 +26,14 @@ extension SearchView {
     var searchBar: some View {
         HStack {
             TextField("", text: $viewModel.searchText)
-                .foregroundColor(.white)
+                .foregroundColor(Color.text)
                 .padding(8)
                 .padding(.horizontal, 24)
                 .overlay(
                     HStack {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(.white)
+                            .foregroundColor(Color.icon
+                            )
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                     }
                 )
@@ -42,8 +42,6 @@ extension SearchView {
             } label: {
                 Text("Cancel")
             }
-
-
         }
         .padding(.horizontal)
     }

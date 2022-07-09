@@ -18,38 +18,30 @@ struct ProfileView: View {
         ZStack(alignment: .trailing) {
             VStack {
                 headerView
+            
                 ScrollView{
                     LazyVStack {
                         statsView
+                            .padding(.bottom)
                         filterBar
+                            
                         postsView
                     }
                 }
-                Spacer()
+                .frame(maxHeight:.infinity)
             }
         
             if showSettings {
-                ZStack {
-                    Color(.black)
-                        .opacity(showSettings ? 0.35 : 0.0)
-                }.onTapGesture {
-                    withAnimation(.easeInOut) {
-                        showSettings = false
-                    }
-                }
-                .ignoresSafeArea()
+                settingsView
             }
             
-
             SettingsView()
                 .frame(width: 300)
                 .offset(x: showSettings ? 0: 300, y: 0)
-                .background(showSettings ? Color.black : Color.clear)
-        
-
+                .background(showSettings ? Color.background : Color.clear)
         }
-        .foregroundColor(.white)
-        .background(.black)
+        .foregroundColor(Color.text)
+        .background(Color.background)
         .onAppear() {
             showSettings = false
         }
@@ -61,27 +53,22 @@ extension ProfileView {
     
     var statsView: some View {
         VStack {
-            VStack {
+            VStack(spacing: 15) {
                 Circle()
-                    .frame(width: 100, height: 100)
+                    .frame(width: 150, height: 150)
                     .padding()
-                
+        
                 Text("@sashalarson")
                     .font(.title3).bold()
         
-                                    
                 Text("Better music taste than you")
-                    .padding()
-
                 
+                HStack {
+                    ProfileStatView(count: "28", what: "Following")
+                    ProfileStatView(count: "837", what: "Followers")
+                    ProfileStatView(count: "16.3K", what: "Likes")
+                }
             }
-            
-            HStack {
-                ProfileStatView(count: "28", what: "Following")
-                ProfileStatView(count: "837", what: "Followers")
-                ProfileStatView(count: "16.3K", what: "Likes")
-            }
-            .padding()
         }
     }
     
@@ -94,6 +81,7 @@ extension ProfileView {
                     dismiss()
                 } label: {
                     Image(systemName: "arrow.left")
+                        .foregroundColor(Color.icon)
                         .padding(.horizontal)
                         .font(.title2)
                 }
@@ -107,24 +95,25 @@ extension ProfileView {
                     }
                 } label: {
                     Image(systemName: "gearshape")
+                        .foregroundColor(Color.icon)
                         .padding(.horizontal)
                         .font(.title2)
                 }
-                
             }
         }
     }
+    
     var filterBar: some View {
         HStack {
             ForEach(PostFilterViewModel.allCases, id: \.rawValue) { item in
                 VStack {
                     Text(item.title)
                         .font(.subheadline)
-                        .fontWeight(selectedFilter == item ? .semibold : .regular)
-                        .foregroundColor(selectedFilter == item ? .white : .gray)
+                        .fontWeight(selectedFilter == item ? .bold : .regular)
+                        .foregroundColor(selectedFilter == item ? .icon : .text)
                     if selectedFilter == item {
                         Capsule()
-                            .foregroundColor(.white)
+                            .foregroundColor(.text)
                             .frame(height: 2)
                             .matchedGeometryEffect(id: "filter", in: animation)
                         
@@ -149,6 +138,17 @@ extension ProfileView {
         }
     }
     
+    var settingsView: some View {
+        ZStack {
+            Color(.black)
+                .opacity(showSettings ? 0.35 : 0.0)
+        }.onTapGesture {
+            withAnimation(.easeInOut) {
+                showSettings = false
+            }
+        }
+        .ignoresSafeArea()
+    }
 }
 
 struct ProfileView_Previews: PreviewProvider {
