@@ -26,6 +26,7 @@ struct SettingsView: View {
                         EditProfileView()
                     } label: {
                         SettingsRowView(viewModel: settingsViewModel)
+                        
                     }
                 
                 } else if settingsViewModel == .logout {
