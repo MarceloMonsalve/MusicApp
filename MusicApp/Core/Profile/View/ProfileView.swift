@@ -12,47 +12,79 @@ struct ProfileView: View {
     @Namespace var animation
     @Environment(\.dismiss) var dismiss
     
+    @State private var showSettings = false
+    
     var body: some View {
-        VStack {
-            headerView
-            ScrollView{
-                LazyVStack {
-                    statsView
-                    filterBar
-                    postsView
+        ZStack(alignment: .trailing) {
+            VStack {
+                headerView
+                ScrollView{
+                    LazyVStack {
+                        statsView
+                        filterBar
+                        postsView
+                    }
                 }
+                Spacer()
             }
-            Spacer()
+        
+            if showSettings {
+                ZStack {
+                    Color(.black)
+                        .opacity(showSettings ? 0.35 : 0.0)
+                }.onTapGesture {
+                    withAnimation(.easeInOut) {
+                        showSettings = false
+                    }
+                }
+                .ignoresSafeArea()
+            }
+            
+
+            SettingsView()
+                .frame(width: 300)
+                .offset(x: showSettings ? 0: 300, y: 0)
+                .background(showSettings ? Color.black : Color.clear)
+        
+
         }
         .foregroundColor(.white)
         .background(.black)
+        .onAppear() {
+            showSettings = false
+        }
+        .navigationBarHidden(true)
     }
 }
 
 extension ProfileView {
+    
     var statsView: some View {
         VStack {
             VStack {
                 Circle()
                     .frame(width: 100, height: 100)
                     .padding()
-                Button {
-                    
-                } label: {
-                    Text("Follow")
-                        .font(.title3).bold()
-                }
+                
+                Text("@sashalarson")
+                    .font(.title3).bold()
+        
+                                    
+                Text("Better music taste than you")
+                    .padding()
+
+                
             }
             
             HStack {
                 ProfileStatView(count: "28", what: "Following")
                 ProfileStatView(count: "837", what: "Followers")
                 ProfileStatView(count: "16.3K", what: "Likes")
-
             }
             .padding()
         }
     }
+    
     var headerView: some View {
         ZStack {
             Text("Sasha Larson")
@@ -69,9 +101,10 @@ extension ProfileView {
             }
             HStack {
                 Spacer()
-                NavigationLink {
-                    SettingsView()
-                        .navigationBarHidden(true)
+                Button {
+                    withAnimation(.easeInOut) {
+                        showSettings.toggle()
+                    }
                 } label: {
                     Image(systemName: "gearshape")
                         .padding(.horizontal)
@@ -81,7 +114,6 @@ extension ProfileView {
             }
         }
     }
-    
     var filterBar: some View {
         HStack {
             ForEach(PostFilterViewModel.allCases, id: \.rawValue) { item in
@@ -111,13 +143,12 @@ extension ProfileView {
         }
         .overlay(Divider().offset(x: 0, y: 16))
     }
-    
     var postsView: some View {
         ForEach(1...5, id: \.self) { _ in
             PostView()
         }
     }
-
+    
 }
 
 struct ProfileView_Previews: PreviewProvider {
