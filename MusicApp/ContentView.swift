@@ -10,11 +10,16 @@ import Firebase
 
 struct ContentView: View {
     @EnvironmentObject var authModel: AuthManager
+    
     var body: some View {
-        if Auth.auth().currentUser != nil {
-          FeedView()
+        if authModel.userSession != nil {
+            if authModel.newUserVar {
+                SignUpView()
+            } else {
+                FeedView()
+            }
         } else {
-          LoginView()
+            LoginView()
         }
     }
 }
