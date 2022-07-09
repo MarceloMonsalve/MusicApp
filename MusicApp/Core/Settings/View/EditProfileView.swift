@@ -14,6 +14,10 @@ struct EditProfileView: View {
     @State private var username = "sashalarson"
     @State private var bio = "Better music taste than you"
     
+    @State private var showImagePicker = false
+    @State private var selectedImage: UIImage?
+    @State private var profileImage: Image?
+    
     var body: some View {
         
         VStack {
@@ -58,6 +62,7 @@ struct EditProfileView_Previews: PreviewProvider {
 }
 
 extension EditProfileView {
+    
     var headerView: some View {
         ZStack {
             Text("Edit Profile")
@@ -72,6 +77,8 @@ extension EditProfileView {
                 }
                 Spacer()
                 Button {
+// somehow check if image is the same, try to delete old profile pics
+//                    viewModel.uploadProfileImage(selectedImage)
                     
                 } label: {
                     Text("Save")
@@ -86,13 +93,44 @@ extension EditProfileView {
         VStack {
             Text("Change profile photo")
                 .font(.title3)
-                .padding()
+                .padding(.top)
+                
             
-            Circle()
-                .frame(width: 100, height: 100)
+            Button {
+                showImagePicker.toggle()
+            } label: {
+                if let profileImage = profileImage {
+                    profileImage
+                        .resizable()
+                        .modifier(ProfileImageModifier())
+                } else {
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
+                        .renderingMode(.template)
+                        .modifier(ProfileImageModifier())
+                        .shadow(color: .white, radius: 6)
+                }
+            }
+            .sheet(isPresented: $showImagePicker,
+                   onDismiss: loadImage) {
+                ImagePicker(selectedImage: $selectedImage)
+            }
         }
+        .ignoresSafeArea()
     }
     
+    func loadImage() {
+        guard let selectedImage = selectedImage else { return }
+        profileImage = Image(uiImage: selectedImage)
+    }
+}
 
-
+private struct ProfileImageModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .foregroundColor(Color(.white))
+            .scaledToFill()
+            .frame(width: 180, height: 180)
+            .clipShape(Circle())
+    }
 }
