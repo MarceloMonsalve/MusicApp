@@ -7,12 +7,13 @@
 
 import SwiftUI
 import FirebaseAuth
+import Firebase
 import CryptoKit
 import AuthenticationServices
 
 struct LoginView: View {
     @State var currentNonce:String?
-    @State var didAuthenticateUser = false
+    @EnvironmentObject var authModel: AuthManager
     
     //Hashing function using CryptoKit
     func sha256(_ input: String) -> String {
@@ -60,7 +61,11 @@ struct LoginView: View {
     var body: some View {
         HStack {
             NavigationLink(destination: FeedView().navigationBarHidden(true),
-                           isActive: $didAuthenticateUser,
+                           isActive: $authModel.didAuthenticateUser,
+                           label: { })
+            
+            NavigationLink(destination: SignUpView().navigationBarHidden(true),
+                           isActive: $authModel.newUser,
                            label: { })
             Spacer()
             VStack {
@@ -97,14 +102,25 @@ struct LoginView: View {
                                           let credential = OAuthProvider.credential(withProviderID: "apple.com",idToken: idTokenString,rawNonce: nonce)
                                           Auth.auth().signIn(with: credential) { (authResult, error) in
                                               if (error != nil) {
+                                                  let docRef = Firestore.firestore().collection("users").document("username")
+                                                  docRef.getDocument { (document, error) in
+                                                      if let document = document, document.exists {
+                                                          authModel.userSession = authResult?.user
+                                                          authModel.didAuthenticateUser = true
+                                                      } else {
+                                                          authModel.userSession = authResult?.user
+                                                          authModel.newUser = true
+                                                      }
+                                                  }
                                                   // Error. If error.code == .MissingOrInvalidNonce, make sure
                                                   // you're sending the SHA256-hashed nonce as a hex string with
                                                   // your request to Apple.
+                                                  
                                                   print(error?.localizedDescription as Any)
                                                   return
                                               }
                                               print("signed in")
-                                              didAuthenticateUser = true
+                                              
                                               
                                           }
                                   
