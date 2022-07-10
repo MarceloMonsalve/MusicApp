@@ -12,6 +12,8 @@ class AuthManager: ObservableObject {
     @Published var userSession: Firebase.User?
     @Published var tempUser: Firebase.User?
     @Published var newUserVar = false
+    @Published var currentUser: User?
+    private let service = UserService()
     
     
     init() {
@@ -20,10 +22,11 @@ class AuthManager: ObservableObject {
         self.userSession = Auth.auth().currentUser
     }
     
-    func setUsername(username: String) {
+    func createUser(username: String) {
         // Add a new document in collection "cities"
         Firestore.firestore().collection("users").document(tempUser!.uid).setData([
-            "username": username.lowercased()
+            "username": username.lowercased(),
+            "id": tempUser!.uid
         ]) { err in
             if let err = err {
                 print("Error writing document: \(err)")
@@ -81,14 +84,13 @@ class AuthManager: ObservableObject {
     }
     
     func fetchUser() {
-        guard let uid = self.userSession?.uid else { return }
-        service.fetchUser(withUid: uid) { user in
+        service.fetchUser(withUid: self.userSession!.uid) { user in
             self.currentUser = user
         }
     }
 
     func signOut() {
-        userSession = nil
+        self.userSession = nil
         try? Auth.auth().signOut()
     }
     
