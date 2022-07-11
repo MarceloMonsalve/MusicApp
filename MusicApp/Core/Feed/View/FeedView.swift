@@ -13,13 +13,14 @@ struct FeedView: View {
             ZStack {
                 Text("JukeBox")
                     .font(.title)
+                    .bold()
                 HStack {
                     NavigationLink {
                         SearchView()
                             .navigationBarHidden(true)
                     } label: {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(.white)
+                            .foregroundColor(Color.icon)
                             .frame(width: 48, height: 48)
                     }
                     
@@ -29,7 +30,7 @@ struct FeedView: View {
                             .navigationBarHidden(true)
                     } label: {
                         Image(systemName: "plus")
-                            .foregroundColor(.white)
+                            .foregroundColor(Color.icon)
                             .frame(width: 48, height: 48)
                     }
                     Spacer()
@@ -40,12 +41,10 @@ struct FeedView: View {
                         Circle()
                             .frame(width: 48, height: 48)
                     }
-
-
                 }
                 .padding(.horizontal)
             }
-            HLine(color: .white, width: 1)
+//            HLine(color: Color.text, width: 1)
             ScrollView {
                 LazyVStack {
                     ForEach(1...5, id: \.self) { _ in
@@ -53,11 +52,9 @@ struct FeedView: View {
                     }
                 }
             }
-            Spacer()
-            
         }
-        .foregroundColor(.white)
-        .background(.black)
+        .foregroundColor(Color.text)
+        .background(Color.background)
     }
 }
 

@@ -30,24 +30,22 @@ struct NewPostView: View {
             Spacer()
             
         }
-        .foregroundColor(.white)
-        .background(.black)
-        
+        .foregroundColor(Color.text)
+        .background(Color.background)
     }
 }
 
 extension NewPostView {
-    
     var spotifyLink: some View {
         HStack {
             TextField("", text: $viewModel.linkText)
-                .foregroundColor(.white)
+                .foregroundColor(Color.text)
                 .padding(8)
                 .padding(.horizontal, 24)
                 .overlay(
                     HStack {
                         Image(systemName: "link")
-                            .foregroundColor(.white)
+                            .foregroundColor(Color.icon)
                             .frame(minWidth: 0,
                                    maxWidth: .infinity,
                                    alignment: .leading)
@@ -87,7 +85,6 @@ extension NewPostView {
 }
 
 struct NewPostView_Previews: PreviewProvider {
-    
     static var previews: some View {
         NewPostView()
     }

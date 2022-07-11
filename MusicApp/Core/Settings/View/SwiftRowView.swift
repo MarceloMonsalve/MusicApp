@@ -14,10 +14,9 @@ struct SettingsRowView: View {
         HStack(spacing: 16 ) {
             Image(systemName: viewModel.imageName)
                 .font(.title)
-                .foregroundColor(.white)
+                .foregroundColor(Color.icon)
             
             Text(viewModel.title)
-                .foregroundColor(.white)
                 .font(.title2)
                 
             
@@ -25,8 +24,6 @@ struct SettingsRowView: View {
         }
         .frame(height: 40)
         .padding(.horizontal)
-        .foregroundColor(.white)
-        .background(.black)
     }
 }
 

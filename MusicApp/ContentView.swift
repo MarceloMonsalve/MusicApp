@@ -10,11 +10,13 @@ import Firebase
 
 struct ContentView: View {
     var body: some View {
-        if Auth.auth().currentUser != nil {
-          FeedView()
-        } else {
-          LoginView()
-        }
+//        if Auth.auth().currentUser != nil {
+//          FeedView()
+//        } else {
+//          LoginView()
+//        }
+        
+        FeedView()
     }
 }
 

@@ -14,46 +14,64 @@ struct EditProfileView: View {
     @State private var username = "sashalarson"
     @State private var bio = "Better music taste than you"
     
+    @State private var showImagePicker = false
+    @State private var selectedImage: UIImage?
+    @State private var profileImage: Image?
+    
     var body: some View {
         
         VStack {
             headerView.padding(.vertical)
-            HLine(color: .white, width: 1)
+//            HLine(color: Color.text, width: 1)
             pictureView
                 .padding(.bottom)
 
-            VStack(spacing: 40) {
-                CustomInputField(imageName: "person",
-                                 placeholderText: "Full Name",
-                                 text: $username)
-                
+            VStack {
                 CustomInputField(imageName: "person",
                                  placeholderText: "Username",
-                                 text: $fullname)
+                                 text: $username)
+                .padding()
+        
+//                if username == "" {
+//
+//                    HStack{
+//                        Text("Username error")
+//                            .bold()
+//                            .foregroundColor(Color(.systemRed))
+//                            .padding(.leading)
+//
+//                        Spacer()
+//                    }
+//                }
                 
+                CustomInputField(imageName: "person",
+                                 placeholderText: "Full Name",
+                                 text: $fullname)
+                .padding()
+
                 CustomInputField(imageName: "highlighter",
                                  placeholderText: "Tell us about yourself...",
                                  text: $bio)
-                
-                
+                .padding()
             }
             .padding(.horizontal, 32)
             .padding(.top)
             
-            
-            
-            
             Spacer()
         }
-        .background(.black)
-        .foregroundColor(.white)
+        .background(Color.background)
+        .foregroundColor(Color.text)
         .navigationBarHidden(true)
     }
 }
 
 struct EditProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        EditProfileView()
+        Group {
+            EditProfileView()
+            EditProfileView()
+                .preferredColorScheme(.dark)
+        }
     }
 }
 
@@ -72,6 +90,11 @@ extension EditProfileView {
                 }
                 Spacer()
                 Button {
+// somehow check if image is the same, try to delete old profile pics
+//                    viewModel.uploadProfileImage(selectedImage)
+                    
+// check if username is valid and available
+// https://stackoverflow.com/questions/47405774/cloud-firestore-enforcing-unique-user-names
                     
                 } label: {
                     Text("Save")
@@ -86,13 +109,43 @@ extension EditProfileView {
         VStack {
             Text("Change profile photo")
                 .font(.title3)
-                .padding()
-            
-            Circle()
-                .frame(width: 100, height: 100)
+                .padding(.top)
+                
+            Button {
+                showImagePicker.toggle()
+            } label: {
+                if let profileImage = profileImage {
+                    profileImage
+                        .resizable()
+                        .modifier(ProfileImageModifier())
+                } else {
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
+                        .renderingMode(.template)
+                        .modifier(ProfileImageModifier())
+                        .shadow(color: Color.text, radius: 2)
+                }
+            }
+            .sheet(isPresented: $showImagePicker,
+                   onDismiss: loadImage) {
+                ImagePicker(selectedImage: $selectedImage)
+            }
         }
+        .ignoresSafeArea()
     }
     
+    func loadImage() {
+        guard let selectedImage = selectedImage else { return }
+        profileImage = Image(uiImage: selectedImage)
+    }
+}
 
-
+private struct ProfileImageModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .foregroundColor(Color.text)
+            .scaledToFill()
+            .frame(width: 180, height: 180)
+            .clipShape(Circle())
+    }
 }

@@ -6,10 +6,8 @@
 //
 
 import SwiftUI
-//import Kingfisher
 
 struct SettingsView: View {
-//    @Environment(\.dismiss) var dismiss
 //    @EnvironmentObject var viewModel: AuthViewModel
     
     var body: some View {
@@ -26,9 +24,7 @@ struct SettingsView: View {
                         EditProfileView()
                     } label: {
                         SettingsRowView(viewModel: settingsViewModel)
-                        
                     }
-                
                 } else if settingsViewModel == .logout {
                     Button {
 //                        viewModel.signOut()
@@ -42,9 +38,8 @@ struct SettingsView: View {
             Spacer()
         }
         .padding()
-        .background(.black)
-        .foregroundColor(.white)
-        
+        .background(Color.background)
+        .foregroundColor(Color.text)
     }
 }
 
