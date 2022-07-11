@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct SettingsView: View {
-//    @EnvironmentObject var viewModel: AuthViewModel
+//    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var authModel: AuthManager
     
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
@@ -27,7 +28,7 @@ struct SettingsView: View {
                     }
                 } else if settingsViewModel == .logout {
                     Button {
-//                        viewModel.signOut()
+                        authModel.signOut()
                     } label: {
                         SettingsRowView(viewModel: settingsViewModel)
                     }

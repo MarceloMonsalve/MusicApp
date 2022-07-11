@@ -7,12 +7,15 @@
 
 import SwiftUI
 import FirebaseAuth
+import Firebase
 import CryptoKit
 import AuthenticationServices
 
 struct LoginView: View {
     @State var currentNonce:String?
+    @EnvironmentObject var authModel: AuthManager
     @State var didAuthenticateUser = false
+    @State var newUser = false
     
     //Hashing function using CryptoKit
     func sha256(_ input: String) -> String {
@@ -62,6 +65,10 @@ struct LoginView: View {
             NavigationLink(destination: FeedView().navigationBarHidden(true),
                            isActive: $didAuthenticateUser,
                            label: { })
+            
+            NavigationLink(destination: SignUpView().navigationBarHidden(true),
+                           isActive: $newUser,
+                           label: { })
             Spacer()
             VStack {
                 Spacer()
@@ -97,14 +104,24 @@ struct LoginView: View {
                                           let credential = OAuthProvider.credential(withProviderID: "apple.com",idToken: idTokenString,rawNonce: nonce)
                                           Auth.auth().signIn(with: credential) { (authResult, error) in
                                               if (error != nil) {
-                                                  // Error. If error.code == .MissingOrInvalidNonce, make sure
-                                                  // you're sending the SHA256-hashed nonce as a hex string with
-                                                  // your request to Apple.
-                                                  print(error?.localizedDescription as Any)
+//                                                  print(error?.localizedDescription as Any)
                                                   return
                                               }
+                                              authModel.tempUser = authResult?.user
+                                              let docRef = Firestore.firestore().collection("users")
+                                                  .document(authResult!.user.uid)
+                                              docRef.getDocument { (document, error) in
+                                                  
+                                                  if let document = document, document.exists {
+                                                      authModel.userSession = authResult?.user
+                                                      didAuthenticateUser = true
+                                                  } else {
+                                                      newUser = true
+                                                  }
+                                              }
+                                              
                                               print("signed in")
-                                              didAuthenticateUser = true
+                                              
                                               
                                           }
                                   

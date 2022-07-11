@@ -11,6 +11,7 @@ struct ProfileView: View {
     @State private var selectedFilter: PostFilterViewModel = .posts
     @Namespace var animation
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var authModel: AuthManager
     
     @State private var showSettings = false
     

@@ -12,6 +12,7 @@ import Firebase
 
 @main
 struct MusicAppApp: App {
+    @StateObject var authModel = AuthManager()
     init() {
         FirebaseApp.configure()
     }
@@ -21,6 +22,7 @@ struct MusicAppApp: App {
                 ContentView()
                     .navigationBarHidden(true)
             }
+            .environmentObject(authModel)
             
         }
     }
