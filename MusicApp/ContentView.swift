@@ -12,14 +12,16 @@ struct ContentView: View {
     @EnvironmentObject var authModel: AuthManager
     
     var body: some View {
-        if authModel.userSession != nil {
-            if authModel.newUserVar {
-                SignUpView()
+        Group {
+            if authModel.userSession != nil {
+                if authModel.newUserVar {
+                    SignUpView()
+                } else {
+                    FeedView()
+                }
             } else {
-                FeedView()
+                LoginView()
             }
-        } else {
-            LoginView()
         }
     }
 }

@@ -38,10 +38,10 @@ struct SignUpView: View {
             
             Button {
                 error = ""
-                authModel.checkUser(username: username) { err in
+                authModel.checkUsername(username: username) { err in
                     if err.isEmpty {
                         usernameCreated = true
-                        authModel.createUsername(username: username)
+                        authModel.createUser(username: username)
                     } else {
                         error = err
                     }
