@@ -73,9 +73,9 @@ struct LoginView: View {
             VStack {
                 Spacer()
                 Text("Sign In")
-                    .foregroundColor(.white)
+                    .foregroundColor(Color.text)
                     .font(.title).bold()
-                    .shadow(color: .white, radius: 2)
+                    .shadow(color: Color.text, radius: 1)
                     .padding()
                 SignInWithAppleButton(
                     onRequest: { request in
@@ -86,46 +86,50 @@ struct LoginView: View {
                     },
                     onCompletion: { result in
                         switch result {
+                            
                             case .success(let authResults):
+                                
                                 switch authResults.credential {
+                                    
                                     case let appleIDCredential as ASAuthorizationAppleIDCredential:
-                                      
-                                          guard let nonce = currentNonce else {
-                                            fatalError("Invalid state: A login callback was received, but no login request was sent.")
+                                        
+                                      guard let nonce = currentNonce else {
+                                        fatalError("Invalid state: A login callback was received, but no login request was sent.")
+                                      }
+                                      guard let appleIDToken = appleIDCredential.identityToken else {
+                                          fatalError("Invalid state: A login callback was received, but no login request was sent.")
+                                      }
+                                      guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+                                        print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
+                                        return
+                                      }
+                                     
+                                      let credential = OAuthProvider.credential(withProviderID: "apple.com",idToken: idTokenString,rawNonce: nonce)
+                                
+                                      Auth.auth().signIn(with: credential) { (authResult, error) in
+                                          if (error != nil) {
+                                              print(error?.localizedDescription as Any)
+                                              return
                                           }
-                                          guard let appleIDToken = appleIDCredential.identityToken else {
-                                              fatalError("Invalid state: A login callback was received, but no login request was sent.")
-                                          }
-                                          guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-                                            print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
-                                            return
-                                          }
-                                         
-                                          let credential = OAuthProvider.credential(withProviderID: "apple.com",idToken: idTokenString,rawNonce: nonce)
-                                          Auth.auth().signIn(with: credential) { (authResult, error) in
-                                              if (error != nil) {
-//                                                  print(error?.localizedDescription as Any)
-                                                  return
+                                          authModel.tempUser = authResult?.user
+                                          let docRef = Firestore.firestore().collection("users")
+                                              .document(authResult!.user.uid)
+                                          docRef.getDocument { (document, error) in
+                                              
+                                              if let document = document, document.exists {
+                                                  authModel.userSession = authResult?.user
+                                                  didAuthenticateUser = true
+                                              } else {
+                                                  newUser = true
                                               }
-                                              authModel.tempUser = authResult?.user
-                                              let docRef = Firestore.firestore().collection("users")
-                                                  .document(authResult!.user.uid)
-                                              docRef.getDocument { (document, error) in
-                                                  
-                                                  if let document = document, document.exists {
-                                                      authModel.userSession = authResult?.user
-                                                      didAuthenticateUser = true
-                                                  } else {
-                                                      newUser = true
-                                                  }
-                                              }
-                                              
-                                              print("signed in")
-                                              
-                                              
                                           }
-                                  
-                                          print("\(String(describing: Auth.auth().currentUser?.uid))")
+                                          
+                                          print("signed in")
+                                          
+                                          
+                                      }
+                              
+                                      print("\(String(describing: Auth.auth().currentUser?.uid))")
                                     default:
                                         break
                                               
@@ -135,8 +139,10 @@ struct LoginView: View {
                         }
                     }
                 )
+                .foregroundColor(Color.text)
+                .background(Color.background)
                 .frame(width: 280, height: 45, alignment: .center)
-                .shadow(color: .white, radius: 6)
+                .shadow(color: Color.text, radius: 6)
                 .padding()
                 .padding(.bottom)
                 Spacer()
@@ -144,15 +150,12 @@ struct LoginView: View {
             
             Spacer()
         }
-        .background(.black)
-        
-        
-        
+        .background(Color.background)
     }
 }
 
-struct LoginView_Previews: PreviewProvider {
-    static var previews: some View {
-        LoginView()
-    }
-}
+//struct LoginView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        LoginView()
+//    }
+//}
