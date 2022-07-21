@@ -8,76 +8,150 @@
 import SwiftUI
 
 struct SignUpView: View {
-    @State var usernameCreated = false
     @State var error = ""
     @State var username = ""
+    @State var fullname = ""
+    @State var bio = ""
+    
+    @State private var imageSelected = false
+    @State private var showImagePicker = false
+    @State private var selectedImage: UIImage?
+    @State private var profileImage: Image?
+    
     @EnvironmentObject var authModel: AuthManager
 
     var body: some View {
         VStack {
-            NavigationLink(destination: FeedView().navigationBarHidden(true),
-                           isActive: $usernameCreated,
-                           label: { })
-            Spacer()
-            HStack {
+            headerView
+                .padding(.vertical)
+            pictureView
+                .padding(.bottom)
+            fieldView
+                .padding(.horizontal, 32)
+                .padding(.top)
+        }
+        .background(Color.background)
+        .foregroundColor(Color.text)
+    }
+}
+
+//struct SignUpView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        SignUpView()
+//    }
+//}
+
+extension SignUpView {
+    var headerView: some View {
+        ZStack {
+            Text("Create Profile")
+                .font(.title2).bold()
+            HStack(){
                 Spacer()
-                ZStack(alignment: .leading) {
-                    TextField("", text: $username)
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
-                        .frame(height: 50)
-                    Text("Username")
-                        .shadow(color: .white, radius: 2, x: 0, y: 0)
-                        .opacity(username.isEmpty ? 0.65 : 0)
-                }
-                Spacer()
-            }
-            .cornerRadius(3)
-            .padding(.horizontal,50)
-            
-            
-            Button {
-                error = ""
-                authModel.checkUsername(username: username) { err in
-                    if err.isEmpty {
-                        usernameCreated = true
-                        authModel.createUser(username: username)
+                Button {
+                    let trimmedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let trimmedName = fullname.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let trimmedBio = bio.trimmingCharacters(in: .whitespacesAndNewlines)
+                    
+                    if fullname.count > 20{
+                        error = "Full name is too long"
+                    } else if fullname.count == 0 {
+                        error = "Full name is too short"
+                    } else if bio.count > 180 {
+                        error = "Bio is too long"
+                    } else if imageSelected == false {
+                        error = "No profile image selected"
                     } else {
-                        error = err
+                        error = ""
+                        
+                        authModel.checkUsername(username: username) { err in
+                            if err.isEmpty {
+                                guard let img = selectedImage else { return }
+                                authModel.createUser(username: trimmedUsername,
+                                                     fullname: trimmedName,
+                                                     bio: trimmedBio,
+                                                     image: img)
+                            } else {
+                                error = err
+                            }
+                        }
                     }
+                } label: {
+                    Text("Save")
+                        .foregroundColor(Color.icon)
+                        .padding(.horizontal)
+                        .font(.title3)
                 }
-            } label: {
-                Text("Continue")
-                    .shadow(color: .white, radius: 1, x: 0, y: 0)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(width: 120, height: 40)
-                    .background(.black)
-                    .cornerRadius(7)
-                    .padding()
             }
-            .shadow(color: .white, radius: 3, x: 0, y: 0)
-
-            Text(error)
-                .opacity(0.8)
-                .shadow(color: .white, radius: 1, x: 0, y: 0)
-                .padding(4)
-
-
+        }
+    }
+    
+    var pictureView: some View {
+        VStack {
+            Text("Change profile photo")
+                .font(.title3)
+                .padding(.top)
+                
+            Button {
+                showImagePicker.toggle()
+            } label: {
+                if let profileImage = profileImage {
+                    profileImage
+                        .resizable()
+                        .modifier(ProfileImageModifier())
+                } else {
+                    Image(systemName: "person.crop.circle.fill")
+                        .resizable()
+                        .renderingMode(.template)
+                        .modifier(ProfileImageModifier())
+                        .shadow(color: Color.text, radius: 2)
+                }
+            }
+            .sheet(isPresented: $showImagePicker, onDismiss: loadImage) {
+                ImagePicker(selectedImage: $selectedImage)
+            }
+        }
+        .ignoresSafeArea()
+    }
+    
+    func loadImage() {
+        guard let selectedImage = selectedImage else { return }
+        profileImage = Image(uiImage: selectedImage)
+        imageSelected = true
+    }
+    
+    var fieldView: some View {
+        VStack {
+            CustomInputField(imageName: "person",
+                             placeholderText: "Username",
+                             text: $username)
+            .padding()
             
+            CustomInputField(imageName: "person",
+                             placeholderText: "Full name",
+                             text: $fullname)
+            .padding()
+
+            CustomInputField(imageName: "highlighter",
+                             placeholderText: "Tell us about yourself...",
+                             text: $bio)
+            .padding()
+        
+            Text(error)
+                .foregroundColor(.red)
+                .padding(4)
 
             Spacer()
         }
-        .background(.black)
-        .foregroundColor(.white)
     }
 }
 
-struct SignUpView_Previews: PreviewProvider {
-    static var previews: some View {
-        SignUpView()
+private struct ProfileImageModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .foregroundColor(Color.text)
+            .scaledToFill()
+            .frame(width: 180, height: 180)
+            .clipShape(Circle())
     }
 }
-
-
-
