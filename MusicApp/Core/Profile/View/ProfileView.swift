@@ -6,13 +6,24 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct ProfileView: View {
     @State private var selectedFilter: PostFilterViewModel = .posts
     @Namespace var animation
     @Environment(\.dismiss) var dismiss
+    @ObservedObject var viewModel: ProfileViewModel
+    let authModel: AuthManager
+    
+    let thisUser: User
     
     @State private var showSettings = false
+    
+    init(user: User, model: AuthManager) {
+        self.thisUser = user
+        self.authModel = model
+        self.viewModel = ProfileViewModel(user: user)
+    }
     
     var body: some View {
         ZStack(alignment: .trailing) {
@@ -35,7 +46,7 @@ struct ProfileView: View {
                 settingsView
             }
             
-            SettingsView()
+            SettingsView(model: self.authModel, user: self.thisUser)
                 .frame(width: 300)
                 .offset(x: showSettings ? 0: 300, y: 0)
                 .background(showSettings ? Color.background : Color.clear)
@@ -54,14 +65,19 @@ extension ProfileView {
     var statsView: some View {
         VStack {
             VStack(spacing: 15) {
-                Circle()
+                KFImage(URL(string: viewModel.user.profileImageUrl))
+                    .resizable()
+                    .scaledToFill()
+                    .clipShape(Circle())
                     .frame(width: 150, height: 150)
                     .padding()
         
-                Text("@sashalarson")
+                Text("@\(viewModel.user.username)")
                     .font(.title3).bold()
         
-                Text("Better music taste than you")
+                if !viewModel.user.bio.isEmpty{
+                    Text("\(viewModel.user.bio)")
+                }
                 
                 HStack {
                     ProfileStatView(count: "28", what: "Following")
@@ -74,7 +90,7 @@ extension ProfileView {
     
     var headerView: some View {
         ZStack {
-            Text("Sasha Larson")
+            Text("\(viewModel.user.fullname)")
                 .font(.title3).bold()
             HStack {
                 Button {
@@ -151,11 +167,11 @@ extension ProfileView {
     }
 }
 
-struct ProfileView_Previews: PreviewProvider {
-    static var previews: some View {
-        ProfileView()
-    }
-}
+//struct ProfileView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ProfileView()
+//    }
+//}
 
 struct ProfileStatView: View {
     let count: String

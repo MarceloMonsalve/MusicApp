@@ -12,16 +12,20 @@ import Firebase
 
 @main
 struct MusicAppApp: App {
+    @StateObject var authModel = AuthManager()
+    
     init() {
         FirebaseApp.configure()
     }
+    
     var body: some Scene {
         WindowGroup {
             NavigationView {
                 ContentView()
                     .navigationBarHidden(true)
             }
-            
+            .environmentObject(authModel)
+            .navigationBarHidden(true)
         }
     }
 }

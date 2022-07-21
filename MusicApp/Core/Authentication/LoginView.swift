@@ -7,12 +7,14 @@
 
 import SwiftUI
 import FirebaseAuth
+import Firebase
 import CryptoKit
 import AuthenticationServices
 
 struct LoginView: View {
     @State var currentNonce:String?
-    @State var didAuthenticateUser = false
+    
+    @EnvironmentObject var authModel: AuthManager
     
     //Hashing function using CryptoKit
     func sha256(_ input: String) -> String {
@@ -59,16 +61,17 @@ struct LoginView: View {
     
     var body: some View {
         HStack {
-            NavigationLink(destination: FeedView().navigationBarHidden(true),
-                           isActive: $didAuthenticateUser,
+            NavigationLink(destination: SignUpView().navigationBarHidden(true),
+                           isActive: $authModel.newUserVar,
                            label: { })
+            
             Spacer()
             VStack {
                 Spacer()
                 Text("Sign In")
-                    .foregroundColor(.white)
+                    .foregroundColor(Color.text)
                     .font(.title).bold()
-                    .shadow(color: .white, radius: 2)
+                    .shadow(color: Color.text, radius: 1)
                     .padding()
                 SignInWithAppleButton(
                     onRequest: { request in
@@ -79,63 +82,69 @@ struct LoginView: View {
                     },
                     onCompletion: { result in
                         switch result {
+                            
                             case .success(let authResults):
+                                
                                 switch authResults.credential {
+                                    
                                     case let appleIDCredential as ASAuthorizationAppleIDCredential:
-                                      
-                                          guard let nonce = currentNonce else {
-                                            fatalError("Invalid state: A login callback was received, but no login request was sent.")
+                                        
+                                      guard let nonce = currentNonce else {
+                                        fatalError("Invalid state: A login callback was received, but no login request was sent.")
+                                      }
+                                      guard let appleIDToken = appleIDCredential.identityToken else {
+                                          fatalError("Invalid state: A login callback was received, but no login request was sent.")
+                                      }
+                                      guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+                                        print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
+                                        return
+                                      }
+                                     
+                                      let credential = OAuthProvider.credential(withProviderID: "apple.com",idToken: idTokenString,rawNonce: nonce)
+                                
+                                      Auth.auth().signIn(with: credential) { (authResult, error) in
+                                          if (error != nil) {
+                                              print(error?.localizedDescription as Any)
+                                              return
                                           }
-                                          guard let appleIDToken = appleIDCredential.identityToken else {
-                                              fatalError("Invalid state: A login callback was received, but no login request was sent.")
-                                          }
-                                          guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-                                            print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
-                                            return
-                                          }
-                                         
-                                          let credential = OAuthProvider.credential(withProviderID: "apple.com",idToken: idTokenString,rawNonce: nonce)
-                                          Auth.auth().signIn(with: credential) { (authResult, error) in
-                                              if (error != nil) {
-                                                  // Error. If error.code == .MissingOrInvalidNonce, make sure
-                                                  // you're sending the SHA256-hashed nonce as a hex string with
-                                                  // your request to Apple.
-                                                  print(error?.localizedDescription as Any)
-                                                  return
+                                          guard let user = authResult?.user else { return }
+                                          guard let uid = authResult?.user.uid else { return }
+                                          let docRef = Firestore.firestore().collection("users")
+                                              .document(uid)
+                                          docRef.getDocument { (document, error) in
+                                              if let document = document, document.exists {
+                                                  authModel.userSession = user
+                                                  authModel.fetchUser()
+                                              } else {
+                                                  authModel.tempSession = user
+                                                  authModel.newUserVar = true
                                               }
-                                              print("signed in")
-                                              didAuthenticateUser = true
-                                              
                                           }
-                                  
-                                          print("\(String(describing: Auth.auth().currentUser?.uid))")
+                                      }
                                     default:
                                         break
-                                              
                                 }
                              default:
                                   break
                         }
                     }
                 )
+                .foregroundColor(Color.text)
+                .background(Color.background)
                 .frame(width: 280, height: 45, alignment: .center)
-                .shadow(color: .white, radius: 6)
+                .shadow(color: Color.text, radius: 6)
                 .padding()
                 .padding(.bottom)
                 Spacer()
             }
-            
             Spacer()
         }
-        .background(.black)
-        
-        
-        
+        .background(Color.background)
     }
 }
 
-struct LoginView_Previews: PreviewProvider {
-    static var previews: some View {
-        LoginView()
-    }
-}
+//struct LoginView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        LoginView()
+//    }
+//}
