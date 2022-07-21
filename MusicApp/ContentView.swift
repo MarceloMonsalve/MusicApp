@@ -13,12 +13,8 @@ struct ContentView: View {
     
     var body: some View {
         Group {
-            if authModel.userSession != nil {
-                if authModel.newUserVar {
-                    SignUpView()
-                } else {
-                    FeedView()
-                }
+            if (authModel.userSession != nil) {
+                FeedView()
             } else {
                 LoginView()
             }
@@ -26,8 +22,8 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
+//struct ContentView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ContentView()
+//    }
+//}

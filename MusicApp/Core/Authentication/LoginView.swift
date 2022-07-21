@@ -13,9 +13,8 @@ import AuthenticationServices
 
 struct LoginView: View {
     @State var currentNonce:String?
+    
     @EnvironmentObject var authModel: AuthManager
-    @State var didAuthenticateUser = false
-    @State var newUser = false
     
     //Hashing function using CryptoKit
     func sha256(_ input: String) -> String {
@@ -62,13 +61,10 @@ struct LoginView: View {
     
     var body: some View {
         HStack {
-            NavigationLink(destination: FeedView().navigationBarHidden(true),
-                           isActive: $didAuthenticateUser,
+            NavigationLink(destination: SignUpView().navigationBarHidden(true),
+                           isActive: $authModel.newUserVar,
                            label: { })
             
-            NavigationLink(destination: SignUpView().navigationBarHidden(true),
-                           isActive: $newUser,
-                           label: { })
             Spacer()
             VStack {
                 Spacer()
@@ -111,28 +107,22 @@ struct LoginView: View {
                                               print(error?.localizedDescription as Any)
                                               return
                                           }
-                                          authModel.tempUser = authResult?.user
+                                          guard let user = authResult?.user else { return }
+                                          guard let uid = authResult?.user.uid else { return }
                                           let docRef = Firestore.firestore().collection("users")
-                                              .document(authResult!.user.uid)
+                                              .document(uid)
                                           docRef.getDocument { (document, error) in
-                                              
                                               if let document = document, document.exists {
-                                                  authModel.userSession = authResult?.user
-                                                  didAuthenticateUser = true
+                                                  authModel.userSession = user
+                                                  authModel.fetchUser()
                                               } else {
-                                                  newUser = true
+                                                  authModel.tempSession = user
+                                                  authModel.newUserVar = true
                                               }
                                           }
-                                          
-                                          print("signed in")
-                                          
-                                          
                                       }
-                              
-                                      print("\(String(describing: Auth.auth().currentUser?.uid))")
                                     default:
                                         break
-                                              
                                 }
                              default:
                                   break
@@ -147,7 +137,6 @@ struct LoginView: View {
                 .padding(.bottom)
                 Spacer()
             }
-            
             Spacer()
         }
         .background(Color.background)

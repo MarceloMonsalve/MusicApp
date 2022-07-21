@@ -5,36 +5,71 @@
 //  Created by Marcelo Monsalve on 7/7/22.
 //
 
-import Foundation
+import SwiftUI
 import Firebase
 
 class AuthManager: ObservableObject {
-    @Published var userSession: Firebase.User?
-    @Published var tempUser: Firebase.User?
-    @Published var newUserVar = false
+    @Published var userSession: FirebaseAuth.User?
+    @Published var tempSession: FirebaseAuth.User?
     @Published var currentUser: User?
+    @Published var newUserVar = false
+    
     private let service = UserService()
     
-    
     init() {
-        self.tempUser = Auth.auth().currentUser
-        self.newUser { bool in self.newUserVar =  bool }
-        self.userSession = Auth.auth().currentUser
+        self.newUser { bool in
+            if !bool{
+                self.userSession = Auth.auth().currentUser
+                self.fetchUser()
+            } else {
+                self.tempSession = Auth.auth().currentUser
+                self.newUserVar = bool
+            }
+        }
+
+//        self.signOut()
     }
     
-    func createUser(username: String) {
-        // Add a new document in collection "cities"
-        Firestore.firestore().collection("users").document(tempUser!.uid).setData([
+    func createUser(username: String, fullname: String, bio: String = "", image: UIImage) {
+        // if user doesnt finish signing up in old session
+        guard let uid = self.tempSession?.uid else { return }
+        Firestore.firestore().collection("users").document(uid).setData([
             "username": username.lowercased(),
-            "id": tempUser!.uid
-        ]) { err in
-            if let err = err {
-                print("Error writing document: \(err)")
-            } else {
-                print("Document successfully written!")
+            "fullname": fullname,
+            "bio": bio,
+        ]) { _ in
+            self.uploadProfileImage(image)
+        }
+    }
+    
+    func updateUser(username: String, fullname: String, bio: String, image: UIImage, imageChanged: Bool, completion: @escaping() -> Void) {
+        guard let uid = self.userSession?.uid else { return }
+        Firestore.firestore().collection("users").document(uid).updateData([
+            "username": username.lowercased(),
+            "fullname": fullname,
+            "bio": bio,
+        ]) { _ in
+            if imageChanged {
+                self.updateProfileImage(image) {
+                    completion()
+                }
             }
         }
     }
+    
+    func updateUser(username: String, fullname: String, bio: String, completion: @escaping() -> Void) {
+        guard let uid = self.userSession?.uid else { return }
+        Firestore.firestore().collection("users").document(uid).updateData([
+            "username": username.lowercased(),
+            "fullname": fullname,
+            "bio": bio,
+        ]) { _ in
+            self.fetchUser()
+            completion()
+        }
+    }
+    
+    
     
     func validateUsername(str: String) -> Bool
     {
@@ -68,30 +103,52 @@ class AuthManager: ObservableObject {
     }
     
     func newUser(completion: @escaping(Bool) -> Void) {
-        guard let uid = self.tempUser?.uid else { return }
-        
+        guard let uid = Auth.auth().currentUser?.uid else { return }
         let docRef = Firestore.firestore().collection("users")
             .document(uid)
         docRef.getDocument { (document, error) in
             if let document = document, document.exists {
                 completion(false)
-                print("does exist")
             } else {
                 completion(true)
-                print("does not exist")
             }
         }
     }
     
+    func uploadProfileImage(_ image: UIImage) {
+        guard let uid = self.tempSession?.uid else { return }
+        ImageUploader.uploadImage(image: image) { profileImageUrl in
+            Firestore.firestore().collection("users")
+                .document(uid)
+                .updateData(["profileImageUrl": profileImageUrl]){ _ in
+                    self.userSession = self.tempSession
+                    self.fetchUser()
+                }
+        }
+    }
+    
+    func updateProfileImage(_ image: UIImage, completion: @escaping() -> Void) {
+        guard let uid = self.userSession?.uid else { return }
+        ImageUploader.uploadImage(image: image) { profileImageUrl in
+            Firestore.firestore().collection("users")
+                .document(uid)
+                .updateData(["profileImageUrl": profileImageUrl]){ _ in
+                    self.fetchUser()
+                    completion()
+                }
+        }
+    }
+    
     func fetchUser() {
-        service.fetchUser(withUid: self.userSession!.uid) { user in
+        guard let uid = self.userSession?.uid else { return }
+        service.fetchUser(withUid: uid) { user in
             self.currentUser = user
         }
     }
 
     func signOut() {
         self.userSession = nil
+        self.newUserVar = false
         try? Auth.auth().signOut()
     }
-    
 }

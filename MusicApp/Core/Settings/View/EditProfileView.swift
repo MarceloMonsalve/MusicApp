@@ -6,58 +6,45 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct EditProfileView: View {
     @Environment(\.dismiss) var dismiss
     
-    @State private var fullname = "Sasha Larson"
-    @State private var username = "sashalarson"
-    @State private var bio = "Better music taste than you"
+    @State var error = ""
+    @State var username: String
+    @State var fullname: String
+    @State var bio: String
     
+    @State private var imageChanged = false
     @State private var showImagePicker = false
     @State private var selectedImage: UIImage?
     @State private var profileImage: Image?
     
-    var body: some View {
+    var currentUser: User?
+    let authModel: AuthManager
+    
+    init(model: AuthManager, username: String, fullname: String, bio: String) {
+        self.authModel = model
         
+        _username = State(initialValue: username)
+        _fullname = State(initialValue: fullname)
+        _bio = State(initialValue: bio)
+        
+        if let user = self.authModel.currentUser{
+            self.currentUser = user
+        }
+    }
+    
+    var body: some View {
         VStack {
-            headerView.padding(.vertical)
-//            HLine(color: Color.text, width: 1)
+            headerView
+                .padding(.vertical)
             pictureView
                 .padding(.bottom)
-
-            VStack {
-                CustomInputField(imageName: "person",
-                                 placeholderText: "Username",
-                                 text: $username)
-                .padding()
-        
-//                if username == "" {
-//
-//                    HStack{
-//                        Text("Username error")
-//                            .bold()
-//                            .foregroundColor(Color(.systemRed))
-//                            .padding(.leading)
-//
-//                        Spacer()
-//                    }
-//                }
-                
-                CustomInputField(imageName: "person",
-                                 placeholderText: "Full Name",
-                                 text: $fullname)
-                .padding()
-
-                CustomInputField(imageName: "highlighter",
-                                 placeholderText: "Tell us about yourself...",
-                                 text: $bio)
-                .padding()
-            }
-            .padding(.horizontal, 32)
-            .padding(.top)
-            
-            Spacer()
+            fieldView
+                .padding(.horizontal, 32)
+                .padding(.top)
         }
         .background(Color.background)
         .foregroundColor(Color.text)
@@ -65,15 +52,15 @@ struct EditProfileView: View {
     }
 }
 
-struct EditProfileView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            EditProfileView()
-            EditProfileView()
-                .preferredColorScheme(.dark)
-        }
-    }
-}
+//struct EditProfileView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        Group {
+//            EditProfileView()
+//            EditProfileView()
+//                .preferredColorScheme(.dark)
+//        }
+//    }
+//}
 
 extension EditProfileView {
     var headerView: some View {
@@ -90,14 +77,65 @@ extension EditProfileView {
                 }
                 Spacer()
                 Button {
-// somehow check if image is the same, try to delete old profile pics
-//                    viewModel.uploadProfileImage(selectedImage)
+                    let trimmedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let trimmedName = fullname.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let trimmedBio = bio.trimmingCharacters(in: .whitespacesAndNewlines)
                     
-// check if username is valid and available
-// https://stackoverflow.com/questions/47405774/cloud-firestore-enforcing-unique-user-names
-                    
+                    if fullname.count > 20{
+                        error = "Full name is too long"
+                    } else if fullname.count == 0 {
+                        error = "Full name is too short"
+                    } else if bio.count > 180 {
+                        error = "Bio is too long"
+                    } else {
+                        error = ""
+                        
+                        authModel.checkUsername(username: username) { err in
+                            if err.isEmpty {
+                                if !imageChanged{
+                                    authModel.updateUser(username: trimmedUsername,
+                                                         fullname: trimmedName,
+                                                         bio: trimmedBio) {
+                                        dismiss()
+                                    }
+                                } else{
+                                    guard let img = selectedImage else { return }
+                                    authModel.updateUser(username: trimmedUsername,
+                                                         fullname: trimmedName,
+                                                         bio: trimmedBio,
+                                                         image: img,
+                                                         imageChanged: imageChanged) {
+                                        dismiss()
+                                    }
+                                }
+                            } else {
+                                error = err
+                                if error == "Username is  taken" {
+                                    if trimmedUsername == currentUser?.username{
+                                        if !imageChanged{
+                                            authModel.updateUser(username: trimmedUsername,
+                                                                 fullname: trimmedName,
+                                                                 bio: trimmedBio) {
+                                                dismiss()
+                                            }
+                                        } else{
+                                            guard let img = selectedImage else { return }
+                                            authModel.updateUser(username: trimmedUsername,
+                                                                 fullname: trimmedName,
+                                                                 bio: trimmedBio,
+                                                                 image: img,
+                                                                 imageChanged: imageChanged) {
+                                                dismiss()
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 } label: {
                     Text("Save")
+                        .foregroundColor(Color.icon)
                         .padding(.horizontal)
                         .font(.title3)
                 }
@@ -119,11 +157,11 @@ extension EditProfileView {
                         .resizable()
                         .modifier(ProfileImageModifier())
                 } else {
-                    Image(systemName: "person.crop.circle.fill")
-                        .resizable()
-                        .renderingMode(.template)
-                        .modifier(ProfileImageModifier())
-                        .shadow(color: Color.text, radius: 2)
+                    if let user = currentUser{
+                        KFImage(URL(string: user.profileImageUrl))
+                            .resizable()
+                            .modifier(ProfileImageModifier())
+                    }
                 }
             }
             .sheet(isPresented: $showImagePicker,
@@ -137,6 +175,32 @@ extension EditProfileView {
     func loadImage() {
         guard let selectedImage = selectedImage else { return }
         profileImage = Image(uiImage: selectedImage)
+        imageChanged = true
+    }
+    
+    var fieldView: some View {
+        VStack {
+            CustomInputField(imageName: "person",
+                             placeholderText: "Username",
+                             text: $username)
+            .padding()
+            
+            CustomInputField(imageName: "person",
+                             placeholderText: "Full name",
+                             text: $fullname)
+            .padding()
+
+            CustomInputField(imageName: "highlighter",
+                             placeholderText: "Tell us about yourself...",
+                             text: $bio)
+            .padding()
+        
+            Text(error)
+                .foregroundColor(.red)
+                .padding(4)
+
+            Spacer()
+        }
     }
 }
 
