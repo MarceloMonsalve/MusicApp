@@ -17,6 +17,7 @@ struct UserService {
                     print("Error getting documents: \(err.localizedDescription)")
                 }
                 guard let snapshot = snapshot else { return }
+                print(snapshot.data()!)
                 guard let user = try? snapshot.data(as: User.self) else { return }
                 completion(user)
             }

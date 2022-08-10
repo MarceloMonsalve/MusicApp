@@ -15,7 +15,7 @@ struct MusicAppApp: App {
     @StateObject var authModel = AuthManager()
     
     init() {
-        FirebaseApp.configure()
+        FirebaseApp.configure()        
     }
     
     var body: some Scene {

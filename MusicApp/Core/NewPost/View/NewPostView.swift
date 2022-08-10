@@ -25,7 +25,14 @@ struct NewPostView: View {
             }
             .padding()
             spotifyLink
-            postPreview
+            if viewModel.validLink {
+                postPreview
+            } else {
+                Spacer()
+                Text("Enter a Spotify Song Link")
+                    .padding(.bottom, 100)
+            }
+            
 
             Spacer()
             
@@ -39,8 +46,11 @@ extension NewPostView {
     var spotifyLink: some View {
         HStack {
             TextField("", text: $viewModel.linkText)
+                .onSubmit {
+                    viewModel.previewLink()
+                }
                 .foregroundColor(Color.text)
-                .padding(8)
+                .padding()
                 .padding(.horizontal, 24)
                 .overlay(
                     HStack {
@@ -52,9 +62,7 @@ extension NewPostView {
                             .padding(.leading, 8)
                     }
                 )
-                .onSubmit {
-                    print("Get song from spotify api here...")
-                }
+
 
 
         }

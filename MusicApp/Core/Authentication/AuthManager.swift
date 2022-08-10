@@ -143,6 +143,7 @@ class AuthManager: ObservableObject {
         guard let uid = self.userSession?.uid else { return }
         service.fetchUser(withUid: uid) { user in
             self.currentUser = user
+            
         }
     }
 
