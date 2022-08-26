@@ -39,11 +39,13 @@ At this stage users can create accounts or login using Firebase's Auth library. 
 <!-- Feed and posts -->
 ## Feed
 Here is where posts will appear that the user can interact with. 
+</br>
 <img src="demo/IMG_4908.PNG" width=20% height=20%>
 
 <!-- Search -->
 ## Search
 In the search page users can search for other accounts.
+</br>
 <img src="demo/IMG_4909.PNG" width=20% height=20%>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
