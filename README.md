@@ -28,20 +28,23 @@ This project was made to create a new way for people to share music. My friend R
 
 At this stage users can create accounts or login using Firebase's Auth library. The login is through Apple to make it easy for the user since this app will be iOS exclusive. The app will ask the user to choose a username then allow them to continue to the feed. The user can further edit their profile from the settings accesible from their profile.
 </br>
-<img src=SignIn width=20% height=20%>
-<img src=Profile width=20% height=20%>
+<img src="demo/IMG_4907.PNG" width=20% height=20%>
+<img src="demo/IMG_4911.PNG" width=20% height=20%>
+<img src="demo/IMG_4912.PNG" width=20% height=20%>
+<img src="demo/IMG_4913.PNG" width=20% height=20%>
+
 
 
 
 <!-- Feed and posts -->
 ## Feed
 Here is where posts will appear that the user can interact with. 
-
+<img src="demo/IMG_4908.PNG" width=20% height=20%>
 
 <!-- Search -->
 ## Search
 In the search page users can search for other accounts.
-
+<img src="demo/IMG_4909.PNG" width=20% height=20%>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -53,10 +56,9 @@ Marcelo Monsalve - marcelohakanson6@gmail.com
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-<--! references -->
-[SignIn]: "IMG_4907.PNG"
-[Feed]: "IMG_4908.PNG"
+<!-- MARKDOWN LINKS & IMAGES -->
+[SignIn]: IMG_4907.PNG
+[Feed]: IMG_4908.PNG
 [Search]: IMG_4909.PNG
 [Post]: IMG_4910.PNG
 [Profile]: IMG_4911.PNG 
