@@ -18,7 +18,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project is a clone of Twitter I created to showcase my ability to code in Swift and use the Firebase api. The features of this app include: User Authorization, Creating and posting Tweets, Following other Users and seeing their posts, and Liking Posts. 
+This project was made to create a new way for people to share music. My friend Ricardo realize that there was no social media soley dedicated to sharing songs you like with your friends so thats what this app does. Friends can follow each other and post songs they like and comment on them. The app is meant to be a cool way for people to discover new music and keep in touch with their friends. Some people have really good music taste so this app will be a good place to show that.
 
 
 
@@ -26,16 +26,16 @@ This project is a clone of Twitter I created to showcase my ability to code in S
 <!-- Authorization -->
 ## Authorization and User Profile
 
-At this stage users can create accounts or login using Firebase's Auth library. Upon first account creation the user will select a profile picture before contiuing to the rest of the app. The user profile shows Tweets the user liked and allows them to either edit their profile or follow the profile depending on whether they are viewing their profile or someone elses. The UI is created with SwiftUI. Below is a demo of what that looks like.
+At this stage users can create accounts or login using Firebase's Auth library. The login is through Apple to make it easy for the user since this app will be iOS exclusive. The app will ask the user to choose a username then allow them to continue to the feed. The user can further edit their profile from the settings accesible from their profile.
 </br>
-<img src="DemoRes/CreateAccount.png" width=20% height=20%>
-<img src="DemoRes/SignIn.png" width=20% height=20%>
+<img src=SignIn width=20% height=20%>
+<img src=Profile width=20% height=20%>
 
 
 
 <!-- Feed and posts -->
 ## Feed
-The feed displays tweets of prople the user follows as shown. Data is fetched from firebase and displayed with the post module.
+Here is where posts will appear that the user can interact with. 
 
 
 <!-- Search -->
@@ -53,3 +53,12 @@ Marcelo Monsalve - marcelohakanson6@gmail.com
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+
+<--! references -->
+[SignIn]: "IMG_4907.PNG"
+[Feed]: "IMG_4908.PNG"
+[Search]: IMG_4909.PNG
+[Post]: IMG_4910.PNG
+[Profile]: IMG_4911.PNG 
+[Settings]: IMG_4912.PNG
+[EditProfile]: IMG_4913.PNG 
